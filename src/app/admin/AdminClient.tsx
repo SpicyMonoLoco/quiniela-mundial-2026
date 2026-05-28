@@ -1,0 +1,161 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import type { Match } from '@/lib/types';
+
+export function AdminClient({ matches: initial }: { matches: Match[] }) {
+  const [matches, setMatches] = useState(initial);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function seedMatches() {
+    setBusy('seed');
+    setMsg(null);
+    const res = await fetch('/api/admin/seed', { method: 'POST' });
+    const j = await res.json();
+    setMsg(j.ok ? `✓ ${j.inserted} partidos cargados` : `Error: ${j.error}`);
+    setBusy(null);
+    if (j.ok) {
+      const refreshed = await fetch('/api/admin/matches').then((r) => r.json());
+      if (refreshed.matches) setMatches(refreshed.matches);
+    }
+  }
+
+  async function refreshResults() {
+    setBusy('refresh');
+    setMsg(null);
+    const res = await fetch('/api/results/refresh', { method: 'POST' });
+    const j = await res.json();
+    setMsg(j.ok ? `✓ ${j.updated ?? 0} resultados actualizados` : `Error: ${j.error}`);
+    setBusy(null);
+    if (j.ok) {
+      const refreshed = await fetch('/api/admin/matches').then((r) => r.json());
+      if (refreshed.matches) setMatches(refreshed.matches);
+    }
+  }
+
+  async function saveResult(matchId: number, body: Record<string, unknown>) {
+    setBusy(`m${matchId}`);
+    const res = await fetch(`/api/admin/results/${matchId}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const j = await res.json();
+    setMsg(j.ok ? `✓ Match ${matchId} guardado` : `Error: ${j.error}`);
+    setBusy(null);
+    if (j.ok && j.match) {
+      setMatches((prev) => prev.map((m) => (m.id === matchId ? j.match : m)));
+    }
+  }
+
+  const byStage = useMemo(() => {
+    const map = new Map<string, Match[]>();
+    for (const m of matches) {
+      if (!map.has(m.stage)) map.set(m.stage, []);
+      map.get(m.stage)!.push(m);
+    }
+    return map;
+  }, [matches]);
+
+  return (
+    <div className="space-y-5">
+      <section className="card p-5">
+        <h1 className="text-xl font-bold mb-1">Panel de admin</h1>
+        <p className="text-gray-400 text-sm">Carga inicial, refresco de resultados y captura manual.</p>
+
+        <div className="flex flex-wrap gap-2 mt-4">
+          <button onClick={seedMatches} disabled={busy === 'seed'} className="btn-primary">
+            {busy === 'seed' ? 'Cargando…' : '1. Cargar 72 partidos de grupos'}
+          </button>
+          <button onClick={refreshResults} disabled={busy === 'refresh'} className="btn-ghost">
+            {busy === 'refresh' ? 'Actualizando…' : '🔄 Traer resultados (football-data.org)'}
+          </button>
+        </div>
+        {msg && <p className="text-sm mt-3 text-accent">{msg}</p>}
+      </section>
+
+      {Array.from(byStage.entries()).map(([stage, list]) => (
+        <section key={stage} className="card p-5">
+          <h2 className="font-semibold mb-3 capitalize">{stage}</h2>
+          <div className="space-y-2">
+            {list.map((m) => (
+              <AdminMatchRow
+                key={m.id}
+                match={m}
+                onSave={(body) => saveResult(m.id, body)}
+                busy={busy === `m${m.id}`}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function AdminMatchRow({
+  match,
+  onSave,
+  busy
+}: {
+  match: Match;
+  onSave: (body: Record<string, unknown>) => void;
+  busy: boolean;
+}) {
+  const [home, setHome] = useState<string>(match.home_score?.toString() ?? '');
+  const [away, setAway] = useState<string>(match.away_score?.toString() ?? '');
+  const [adv, setAdv] = useState<string>(match.advances_team ?? '');
+  const [status, setStatus] = useState<string>(match.status);
+
+  const isDraw = home !== '' && away !== '' && Number(home) === Number(away);
+  const isKnockout = match.stage !== 'group';
+
+  return (
+    <div className="border-t border-line first:border-t-0 pt-2 first:pt-0">
+      <div className="flex items-center gap-2 flex-wrap text-sm">
+        <span className="text-gray-400 w-8">#{match.id}</span>
+        <span className="flex-1 truncate">
+          {match.home_team} vs {match.away_team}
+        </span>
+        <input value={home} onChange={(e) => setHome(e.target.value)} className="input-score" />
+        <span className="text-gray-500">–</span>
+        <input value={away} onChange={(e) => setAway(e.target.value)} className="input-score" />
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="bg-ink border border-line rounded px-2 py-1"
+        >
+          <option value="SCHEDULED">SCHEDULED</option>
+          <option value="LIVE">LIVE</option>
+          <option value="FINISHED">FINISHED</option>
+        </select>
+        {isKnockout && isDraw && (
+          <select
+            value={adv}
+            onChange={(e) => setAdv(e.target.value)}
+            className="bg-ink border border-line rounded px-2 py-1"
+          >
+            <option value="">¿avanza?</option>
+            <option value={match.home_team}>{match.home_team}</option>
+            <option value={match.away_team}>{match.away_team}</option>
+          </select>
+        )}
+        <button
+          disabled={busy}
+          onClick={() =>
+            onSave({
+              home_score: home === '' ? null : Number(home),
+              away_score: away === '' ? null : Number(away),
+              advances_team: isKnockout && isDraw && adv ? adv : null,
+              status
+            })
+          }
+          className="btn-primary text-xs px-3 py-1"
+        >
+          {busy ? '…' : 'Guardar'}
+        </button>
+      </div>
+    </div>
+  );
+}
