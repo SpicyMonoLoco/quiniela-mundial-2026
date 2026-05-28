@@ -43,9 +43,6 @@ export function FunFact() {
           WORLD_CUP_FACTS[index]
         )}
       </p>
-      <p className="text-[10px] text-gray-600 mt-2">
-        {index !== null && `Dato ${index + 1} de ${WORLD_CUP_FACTS.length}`}
-      </p>
     </section>
   );
 }
