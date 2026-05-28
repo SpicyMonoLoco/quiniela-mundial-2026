@@ -6,15 +6,17 @@
 // 6 partidos tienen `timeConfirmed: false` — fecha/sede/oponentes confirmados,
 // pero la hora exacta se infirió del patrón. Verifica en fifa.com antes del kickoff.
 
+export type Stage = 'group' | 'r32' | 'r16' | 'qf' | 'sf' | 'tp' | 'final';
+
 export type RawMatch = {
   id: number;
-  stage: 'group';
-  group_letter: string;
-  matchday: number;
+  stage: Stage;
+  group_letter: string | null;
+  matchday: number | null;
   // hora local en el estadio
   date: string; // YYYY-MM-DD
   time: string; // HH:MM (24h, local del estadio)
-  tzOffset: number; // horas vs UTC (junio 2026, ya con DST aplicado)
+  tzOffset: number; // horas vs UTC (junio/julio 2026, ya con DST aplicado)
   venue: string;
   city: string;
   country: 'MEX' | 'USA' | 'CAN';
@@ -100,7 +102,57 @@ export const RAW_MATCHES: RawMatch[] = [
   { id: 69, stage: 'group', group_letter: 'K', matchday: 3, date: '2026-06-27', time: '17:30', tzOffset: -4, venue: 'Hard Rock Stadium',   city: 'Miami',             country: 'USA', home: 'Colombia',                 away: 'Portugal' },
   { id: 70, stage: 'group', group_letter: 'K', matchday: 3, date: '2026-06-27', time: '17:30', tzOffset: -4, venue: 'Mercedes-Benz Stad.', city: 'Atlanta',           country: 'USA', home: 'RD Congo',                 away: 'Uzbekistán' },
   { id: 71, stage: 'group', group_letter: 'L', matchday: 3, date: '2026-06-27', time: '17:00', tzOffset: -4, venue: 'MetLife Stadium',     city: 'East Rutherford',   country: 'USA', home: 'Panamá',                   away: 'Inglaterra' },
-  { id: 72, stage: 'group', group_letter: 'L', matchday: 3, date: '2026-06-27', time: '17:00', tzOffset: -4, venue: 'Lincoln Financial',   city: 'Philadelphia',      country: 'USA', home: 'Croacia',                  away: 'Ghana' }
+  { id: 72, stage: 'group', group_letter: 'L', matchday: 3, date: '2026-06-27', time: '17:00', tzOffset: -4, venue: 'Lincoln Financial',   city: 'Philadelphia',      country: 'USA', home: 'Croacia',                  away: 'Ghana' },
+
+  // ============================================================
+  //  FASE ELIMINATORIA — placeholders. Cuando termine la fase de
+  //  grupos, edita los nombres reales desde /admin.
+  //  Fechas y sedes oficiales del calendario FIFA 2026.
+  // ============================================================
+
+  // ===== Dieciseisavos (R32) — 28 jun a 3 jul =====
+  { id: 73,  stage: 'r32', group_letter: null, matchday: null, date: '2026-06-28', time: '12:00', tzOffset: -7, venue: 'SoFi Stadium',           city: 'Inglewood (LA)',     country: 'USA', home: '2° A',  away: '2° B' },
+  { id: 74,  stage: 'r32', group_letter: null, matchday: null, date: '2026-06-29', time: '16:30', tzOffset: -4, venue: 'Gillette Stadium',       city: 'Foxborough',         country: 'USA', home: '1° E',  away: 'Mejor 3° (A/B/C/D/F)' },
+  { id: 75,  stage: 'r32', group_letter: null, matchday: null, date: '2026-06-29', time: '19:00', tzOffset: -6, venue: 'Estadio BBVA',           city: 'Monterrey',          country: 'MEX', home: '1° F',  away: '2° C' },
+  { id: 76,  stage: 'r32', group_letter: null, matchday: null, date: '2026-06-29', time: '12:00', tzOffset: -5, venue: 'NRG Stadium',            city: 'Houston',            country: 'USA', home: '1° C',  away: '2° F' },
+  { id: 77,  stage: 'r32', group_letter: null, matchday: null, date: '2026-06-30', time: '17:00', tzOffset: -4, venue: 'MetLife Stadium',        city: 'East Rutherford',    country: 'USA', home: '1° I',  away: 'Mejor 3° (C/D/F/G/H)' },
+  { id: 78,  stage: 'r32', group_letter: null, matchday: null, date: '2026-06-30', time: '12:00', tzOffset: -5, venue: 'AT&T Stadium',           city: 'Arlington',          country: 'USA', home: '2° E',  away: '2° I' },
+  { id: 79,  stage: 'r32', group_letter: null, matchday: null, date: '2026-06-30', time: '19:00', tzOffset: -6, venue: 'Estadio Azteca',         city: 'Ciudad de México',   country: 'MEX', home: '1° A',  away: 'Mejor 3° (C/E/F/H/I)' },
+  { id: 80,  stage: 'r32', group_letter: null, matchday: null, date: '2026-07-01', time: '12:00', tzOffset: -4, venue: 'Mercedes-Benz Stad.',    city: 'Atlanta',            country: 'USA', home: '1° L',  away: 'Mejor 3° (E/H/I/J/K)' },
+  { id: 81,  stage: 'r32', group_letter: null, matchday: null, date: '2026-07-01', time: '17:00', tzOffset: -7, venue: "Levi's Stadium",         city: 'Santa Clara',        country: 'USA', home: '1° D',  away: 'Mejor 3° (B/E/F/I/J)' },
+  { id: 82,  stage: 'r32', group_letter: null, matchday: null, date: '2026-07-01', time: '13:00', tzOffset: -7, venue: 'Lumen Field',            city: 'Seattle',            country: 'USA', home: '1° G',  away: 'Mejor 3° (A/E/H/I/J)' },
+  { id: 83,  stage: 'r32', group_letter: null, matchday: null, date: '2026-07-02', time: '19:00', tzOffset: -4, venue: 'BMO Field',              city: 'Toronto',            country: 'CAN', home: '2° K',  away: '2° L' },
+  { id: 84,  stage: 'r32', group_letter: null, matchday: null, date: '2026-07-02', time: '12:00', tzOffset: -7, venue: 'SoFi Stadium',           city: 'Inglewood (LA)',     country: 'USA', home: '1° H',  away: '2° J' },
+  { id: 85,  stage: 'r32', group_letter: null, matchday: null, date: '2026-07-02', time: '20:00', tzOffset: -7, venue: 'BC Place',               city: 'Vancouver',          country: 'CAN', home: '1° B',  away: 'Mejor 3° (E/F/G/I/J)' },
+  { id: 86,  stage: 'r32', group_letter: null, matchday: null, date: '2026-07-03', time: '18:00', tzOffset: -4, venue: 'Hard Rock Stadium',      city: 'Miami',              country: 'USA', home: '1° J',  away: '2° H' },
+  { id: 87,  stage: 'r32', group_letter: null, matchday: null, date: '2026-07-03', time: '20:30', tzOffset: -5, venue: 'Arrowhead Stadium',      city: 'Kansas City',        country: 'USA', home: '1° K',  away: 'Mejor 3° (D/E/I/J/L)' },
+  { id: 88,  stage: 'r32', group_letter: null, matchday: null, date: '2026-07-03', time: '13:00', tzOffset: -5, venue: 'AT&T Stadium',           city: 'Arlington',          country: 'USA', home: '2° D',  away: '2° G' },
+
+  // ===== Octavos (R16) — 4 a 7 jul =====
+  { id: 89,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-04', time: '17:00', tzOffset: -4, venue: 'Lincoln Financial',      city: 'Philadelphia',       country: 'USA', home: 'Ganador 74', away: 'Ganador 77' },
+  { id: 90,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-04', time: '12:00', tzOffset: -5, venue: 'NRG Stadium',            city: 'Houston',            country: 'USA', home: 'Ganador 73', away: 'Ganador 75' },
+  { id: 91,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-05', time: '16:00', tzOffset: -4, venue: 'MetLife Stadium',        city: 'East Rutherford',    country: 'USA', home: 'Ganador 76', away: 'Ganador 78' },
+  { id: 92,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-05', time: '18:00', tzOffset: -6, venue: 'Estadio Azteca',         city: 'Ciudad de México',   country: 'MEX', home: 'Ganador 79', away: 'Ganador 80' },
+  { id: 93,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-06', time: '14:00', tzOffset: -5, venue: 'AT&T Stadium',           city: 'Arlington',          country: 'USA', home: 'Ganador 83', away: 'Ganador 84' },
+  { id: 94,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-06', time: '17:00', tzOffset: -7, venue: 'Lumen Field',            city: 'Seattle',            country: 'USA', home: 'Ganador 81', away: 'Ganador 82' },
+  { id: 95,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-07', time: '12:00', tzOffset: -4, venue: 'Mercedes-Benz Stad.',    city: 'Atlanta',            country: 'USA', home: 'Ganador 86', away: 'Ganador 88' },
+  { id: 96,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-07', time: '13:00', tzOffset: -7, venue: 'BC Place',               city: 'Vancouver',          country: 'CAN', home: 'Ganador 85', away: 'Ganador 87' },
+
+  // ===== Cuartos (QF) — 9 a 11 jul =====
+  { id: 97,  stage: 'qf',  group_letter: null, matchday: null, date: '2026-07-09', time: '16:00', tzOffset: -4, venue: 'Gillette Stadium',       city: 'Foxborough',         country: 'USA', home: 'Ganador 89', away: 'Ganador 90' },
+  { id: 98,  stage: 'qf',  group_letter: null, matchday: null, date: '2026-07-10', time: '12:00', tzOffset: -7, venue: 'SoFi Stadium',           city: 'Inglewood (LA)',     country: 'USA', home: 'Ganador 93', away: 'Ganador 94' },
+  { id: 99,  stage: 'qf',  group_letter: null, matchday: null, date: '2026-07-11', time: '17:00', tzOffset: -4, venue: 'Hard Rock Stadium',      city: 'Miami',              country: 'USA', home: 'Ganador 91', away: 'Ganador 92' },
+  { id: 100, stage: 'qf',  group_letter: null, matchday: null, date: '2026-07-11', time: '20:00', tzOffset: -5, venue: 'Arrowhead Stadium',      city: 'Kansas City',        country: 'USA', home: 'Ganador 95', away: 'Ganador 96' },
+
+  // ===== Semis — 14 y 15 jul =====
+  { id: 101, stage: 'sf',  group_letter: null, matchday: null, date: '2026-07-14', time: '14:00', tzOffset: -5, venue: 'AT&T Stadium',           city: 'Arlington',          country: 'USA', home: 'Ganador 97', away: 'Ganador 98' },
+  { id: 102, stage: 'sf',  group_letter: null, matchday: null, date: '2026-07-15', time: '15:00', tzOffset: -4, venue: 'Mercedes-Benz Stad.',    city: 'Atlanta',            country: 'USA', home: 'Ganador 99', away: 'Ganador 100' },
+
+  // ===== Tercer lugar — 18 jul =====
+  { id: 103, stage: 'tp',  group_letter: null, matchday: null, date: '2026-07-18', time: '17:00', tzOffset: -4, venue: 'Hard Rock Stadium',      city: 'Miami',              country: 'USA', home: 'Perdedor 101', away: 'Perdedor 102' },
+
+  // ===== Final — 19 jul =====
+  { id: 104, stage: 'final', group_letter: null, matchday: null, date: '2026-07-19', time: '15:00', tzOffset: -4, venue: 'MetLife Stadium',     city: 'East Rutherford',    country: 'USA', home: 'Ganador 101', away: 'Ganador 102' }
 ];
 
 // Convierte "fecha local + hora local + offset" a un ISO string UTC.
