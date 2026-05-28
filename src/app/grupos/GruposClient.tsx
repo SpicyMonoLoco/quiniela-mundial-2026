@@ -85,7 +85,7 @@ export function GruposClient({ matches, picks }: { matches: Match[]; picks: User
       </div>
 
       {/* Tablas */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid lg:grid-cols-2 gap-4">
         <StandingsTable
           title="Realidad"
           rows={realStandings}

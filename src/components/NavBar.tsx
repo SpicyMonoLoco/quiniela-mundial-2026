@@ -44,7 +44,7 @@ export function NavBar() {
 
   return (
     <header className="border-b border-line bg-ink/80 backdrop-blur sticky top-0 z-10">
-      <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div className="max-w-3xl lg:max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group" onClick={() => setMenuOpen(false)}>
           <span className="inline-flex items-center justify-center h-8 px-2 rounded-md bg-gradient-to-br from-accent to-gold text-ink font-extrabold tracking-wider text-sm shadow-sm">
             PDP
@@ -115,7 +115,7 @@ export function NavBar() {
       {/* Dropdown móvil */}
       {menuOpen && email && (
         <div className="md:hidden border-t border-line bg-ink">
-          <nav className="max-w-3xl mx-auto px-4 py-2 flex flex-col">
+          <nav className="max-w-3xl lg:max-w-5xl mx-auto px-4 py-2 flex flex-col">
             {links.map((l) => (
               <Link
                 key={l.href}

@@ -285,7 +285,7 @@ function GroupedView({ matches, picks, locked, onChange, config }: ViewProps) {
   }
 
   return (
-    <div className="grid md:grid-cols-2 gap-4">
+    <div className="grid lg:grid-cols-2 gap-4">
       {groups.map(([letter, list]) => {
         // Cuántos picks llevas en este grupo
         const picked = list.filter((m) => picks[m.id]).length;

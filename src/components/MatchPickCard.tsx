@@ -65,14 +65,14 @@ export function MatchPickCard({ match, initialPick, locked, onChange, pointsEarn
         <span>{formatKickoff(match.kickoff_utc)}</span>
       </div>
 
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-        <div className="text-right">
-          <div className="font-semibold flex items-center justify-end gap-1.5">
-            <span>{match.home_team}</span>
-            <span className="text-lg leading-none">{flagFor(match.home_team)}</span>
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-3 min-w-0">
+        <div className="text-right min-w-0">
+          <div className="text-sm font-semibold flex items-center justify-end gap-1.5 leading-tight">
+            <span className="break-words">{match.home_team}</span>
+            <span className="text-base leading-none shrink-0">{flagFor(match.home_team)}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
           <input
             type="number"
             min={0}
@@ -101,10 +101,10 @@ export function MatchPickCard({ match, initialPick, locked, onChange, pointsEarn
             placeholder="–"
           />
         </div>
-        <div className="text-left">
-          <div className="font-semibold flex items-center gap-1.5">
-            <span className="text-lg leading-none">{flagFor(match.away_team)}</span>
-            <span>{match.away_team}</span>
+        <div className="text-left min-w-0">
+          <div className="text-sm font-semibold flex items-center gap-1.5 leading-tight">
+            <span className="text-base leading-none shrink-0">{flagFor(match.away_team)}</span>
+            <span className="break-words">{match.away_team}</span>
           </div>
         </div>
       </div>
