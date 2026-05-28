@@ -9,17 +9,12 @@ export function NavBar() {
   const path = usePathname();
   const router = useRouter();
   const [email, setEmail] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
       setEmail(data.user?.email ?? null);
-      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL?.toLowerCase();
-      if (adminEmail && data.user?.email?.toLowerCase() === adminEmail) {
-        setIsAdmin(true);
-      }
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setEmail(session?.user?.email ?? null);
@@ -43,9 +38,9 @@ export function NavBar() {
     { href: '/', label: 'Ranking' },
     { href: '/picks', label: 'Mis picks' },
     { href: '/grupos', label: 'Grupos' },
-    { href: '/historico', label: 'Histórico' }
+    { href: '/historico', label: 'Histórico' },
+    { href: '/admin', label: 'Admin' }
   ];
-  if (isAdmin) links.push({ href: '/admin', label: 'Admin' });
 
   return (
     <header className="border-b border-line bg-ink/80 backdrop-blur sticky top-0 z-10">
