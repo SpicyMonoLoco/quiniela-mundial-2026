@@ -191,39 +191,148 @@ export function PicksClient({
       )}
 
       {/* Lista de partidos */}
-      <div className="space-y-3">
-        {activeMatches.map((m) => {
-          const p = picks[m.id] ?? null;
-          const matchLocked = stageIsLocked;
-          const points =
-            m.status === 'FINISHED' && p && p.home_score !== '' && p.away_score !== ''
-              ? scorePick(
-                  {
-                    home_score: p.home_score as number,
-                    away_score: p.away_score as number,
-                    advances_team: p.advances_team
-                  },
-                  m,
-                  { pts_exact: config.pts_exact, pts_result: config.pts_result }
-                )
-              : null;
-          return (
-            <MatchPickCard
-              key={m.id}
-              match={m}
-              initialPick={p}
-              locked={matchLocked}
-              onChange={onMatchChange}
-              pointsEarned={points}
-            />
-          );
-        })}
-        {activeMatches.length === 0 && (
-          <p className="text-gray-500 text-sm text-center py-8">
-            Los partidos de esta ronda se publicarán cuando termine la fase anterior.
-          </p>
-        )}
-      </div>
+      {activeStage === 'group' ? (
+        <GroupedView
+          matches={activeMatches}
+          picks={picks}
+          locked={stageIsLocked}
+          onChange={onMatchChange}
+          config={config}
+        />
+      ) : (
+        <FlatView
+          matches={activeMatches}
+          picks={picks}
+          locked={stageIsLocked}
+          onChange={onMatchChange}
+          config={config}
+        />
+      )}
+    </div>
+  );
+}
+
+type ViewProps = {
+  matches: Match[];
+  picks: Record<number, LocalPick>;
+  locked: boolean;
+  onChange: (matchId: number, pick: LocalPick | null) => void;
+  config: PoolConfig;
+};
+
+function pointsFor(
+  m: Match,
+  p: LocalPick | null,
+  config: { pts_exact: number; pts_result: number }
+): number | null {
+  if (m.status !== 'FINISHED') return null;
+  if (!p || p.home_score === '' || p.away_score === '') return null;
+  return scorePick(
+    {
+      home_score: p.home_score as number,
+      away_score: p.away_score as number,
+      advances_team: p.advances_team
+    },
+    m,
+    config
+  );
+}
+
+function FlatView({ matches, picks, locked, onChange, config }: ViewProps) {
+  if (matches.length === 0) {
+    return (
+      <p className="text-gray-500 text-sm text-center py-8">
+        Los partidos de esta ronda se publicarán cuando termine la fase anterior.
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-3">
+      {matches.map((m) => {
+        const p = picks[m.id] ?? null;
+        return (
+          <MatchPickCard
+            key={m.id}
+            match={m}
+            initialPick={p}
+            locked={locked}
+            onChange={onChange}
+            pointsEarned={pointsFor(m, p, { pts_exact: config.pts_exact, pts_result: config.pts_result })}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function GroupedView({ matches, picks, locked, onChange, config }: ViewProps) {
+  const groups = useMemo(() => {
+    const map = new Map<string, Match[]>();
+    for (const m of matches) {
+      const g = m.group_letter ?? '?';
+      if (!map.has(g)) map.set(g, []);
+      map.get(g)!.push(m);
+    }
+    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
+  }, [matches]);
+
+  if (groups.length === 0) {
+    return (
+      <p className="text-gray-500 text-sm text-center py-8">
+        Aún no hay partidos cargados.
+      </p>
+    );
+  }
+
+  return (
+    <div className="grid md:grid-cols-2 gap-4">
+      {groups.map(([letter, list]) => {
+        // Cuántos picks llevas en este grupo
+        const picked = list.filter((m) => picks[m.id]).length;
+        // Puntos del grupo (suma de matches calificados)
+        let earned = 0;
+        let graded = 0;
+        for (const m of list) {
+          const pts = pointsFor(m, picks[m.id] ?? null, { pts_exact: config.pts_exact, pts_result: config.pts_result });
+          if (pts !== null) {
+            earned += pts;
+            graded++;
+          }
+        }
+        return (
+          <section key={letter} className="card p-4">
+            <header className="flex items-center justify-between mb-3 pb-2 border-b border-line">
+              <h3 className="font-bold">
+                <span className="inline-flex items-center justify-center w-7 h-7 bg-accent text-ink rounded-md text-sm mr-2">
+                  {letter}
+                </span>
+                Grupo {letter}
+              </h3>
+              <div className="text-right text-xs">
+                <div className="text-gray-400">{picked}/6 picks</div>
+                {graded > 0 && (
+                  <div className="text-accent font-bold">{earned} pts</div>
+                )}
+              </div>
+            </header>
+            <div className="space-y-2">
+              {list.map((m) => {
+                const p = picks[m.id] ?? null;
+                return (
+                  <MatchPickCard
+                    key={m.id}
+                    match={m}
+                    initialPick={p}
+                    locked={locked}
+                    onChange={onChange}
+                    pointsEarned={pointsFor(m, p, { pts_exact: config.pts_exact, pts_result: config.pts_result })}
+                  />
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }
