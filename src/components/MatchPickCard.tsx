@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Match } from '@/lib/types';
+import { flagFor } from '@/lib/flags';
 
 type LocalPick = {
   home_score: number | '';
@@ -66,7 +67,10 @@ export function MatchPickCard({ match, initialPick, locked, onChange, pointsEarn
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <div className="text-right">
-          <div className="font-semibold">{match.home_team}</div>
+          <div className="font-semibold flex items-center justify-end gap-1.5">
+            <span>{match.home_team}</span>
+            <span className="text-lg leading-none">{flagFor(match.home_team)}</span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <input
@@ -98,7 +102,10 @@ export function MatchPickCard({ match, initialPick, locked, onChange, pointsEarn
           />
         </div>
         <div className="text-left">
-          <div className="font-semibold">{match.away_team}</div>
+          <div className="font-semibold flex items-center gap-1.5">
+            <span className="text-lg leading-none">{flagFor(match.away_team)}</span>
+            <span>{match.away_team}</span>
+          </div>
         </div>
       </div>
 

@@ -9,6 +9,7 @@ import {
   type StandingRow,
   type ScorePair
 } from '@/lib/standings';
+import { flagFor } from '@/lib/flags';
 
 const GROUPS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as const;
 type GroupLetter = (typeof GROUPS)[number];
@@ -165,6 +166,7 @@ function StandingsTable({
                   </span>
                 </td>
                 <td className="py-2 font-medium flex items-center gap-1.5">
+                  <span className="text-base leading-none">{flagFor(r.team)}</span>
                   {r.team}
                   {showCompareHint && highlightAgainst && realPos !== undefined && (
                     <span

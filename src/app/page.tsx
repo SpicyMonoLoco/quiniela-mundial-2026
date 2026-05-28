@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import type { LeaderRow, PoolConfig, Match } from '@/lib/types';
+import { flagFor } from '@/lib/flags';
+import { FunFact } from '@/components/FunFact';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,6 +68,9 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Dato curioso del Mundial */}
+      <FunFact />
+
       {/* Ranking */}
       <section className="card p-5">
         <h2 className="font-semibold mb-3">🏅 Ranking</h2>
@@ -107,9 +112,15 @@ export default async function Home() {
             <div key={m.id} className="flex items-center justify-between border-t border-line first:border-t-0 pt-2 first:pt-0">
               <div className="text-sm">
                 <span className="badge bg-line text-gray-300 mr-2">Grupo {m.group_letter}</span>
-                <span className="font-medium">{m.home_team}</span>
+                <span className="font-medium">
+                  <span className="mr-1">{flagFor(m.home_team)}</span>
+                  {m.home_team}
+                </span>
                 <span className="text-gray-500 mx-1.5">vs</span>
-                <span className="font-medium">{m.away_team}</span>
+                <span className="font-medium">
+                  <span className="mr-1">{flagFor(m.away_team)}</span>
+                  {m.away_team}
+                </span>
               </div>
               <div className="text-xs text-gray-400">{formatCDMX(m.kickoff_utc)}</div>
             </div>

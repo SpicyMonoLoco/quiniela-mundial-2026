@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import type { Match } from '@/lib/types';
 import { scorePick } from '@/lib/scoring';
+import { flagFor } from '@/lib/flags';
 
 type PlayerPick = {
   match_id: number;
@@ -135,7 +136,10 @@ export function PlayerPicksClient({
                 <span>{formatCDMX(m.kickoff_utc)}</span>
               </div>
               <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-                <div className="text-right font-medium">{m.home_team}</div>
+                <div className="text-right font-medium flex items-center justify-end gap-1.5">
+                  <span>{m.home_team}</span>
+                  <span className="text-base leading-none">{flagFor(m.home_team)}</span>
+                </div>
                 <div className="text-center">
                   {pick ? (
                     <>
@@ -157,7 +161,10 @@ export function PlayerPicksClient({
                     </div>
                   )}
                 </div>
-                <div className="text-left font-medium">{m.away_team}</div>
+                <div className="text-left font-medium flex items-center gap-1.5">
+                  <span className="text-base leading-none">{flagFor(m.away_team)}</span>
+                  <span>{m.away_team}</span>
+                </div>
               </div>
               {points !== null && (
                 <div className="mt-2 text-right">
