@@ -26,7 +26,7 @@ export function FunFact() {
       <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-gradient-to-tr from-gold/15 to-accent/10 blur-3xl pointer-events-none" />
       <div className="flex items-start justify-between gap-3 mb-3">
         <h2 className="font-semibold flex items-center gap-2">
-          <span>💡</span> ¿Sabías que…?
+          <span>⚽</span> Dato mundialista de Dani
         </h2>
         <button
           onClick={nextFact}
