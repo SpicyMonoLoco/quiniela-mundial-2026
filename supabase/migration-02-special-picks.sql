@@ -66,7 +66,7 @@ on conflict (award) do nothing;
 
 -- --------- Config: pts_award + semi_lock_utc ---------
 alter table public.pool_config
-  add column if not exists pts_award      int          not null default 2,
+  add column if not exists pts_award      int          not null default 10,
   add column if not exists semi_lock_utc  timestamptz;
 
 -- SF1 kickoff: 2026-07-14 19:00 UTC (Dallas 14:00 CDT). 2h antes = 17:00 UTC.
