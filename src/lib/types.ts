@@ -39,6 +39,9 @@ export type LeaderRow = {
   exact_count: number;
   graded_count: number;
   total_picks: number;
+  match_points: number;
+  award_points: number;
+  award_correct: number;
   rank: number;
 };
 
@@ -48,4 +51,21 @@ export type PoolConfig = {
   pts_exact: number;
   pts_result: number;
   knockout_lock_hours: number;
+  pts_award: number;
+  semi_lock_utc: string;
+};
+
+export type Award = 'top_scorer' | 'top_assists' | 'best_keeper' | 'best_player';
+
+export type SpecialPick = {
+  user_id: string;
+  award: Award;
+  player_name: string;
+  updated_at: string;
+};
+
+export type TournamentAward = {
+  award: Award;
+  player_name: string | null;
+  updated_at: string;
 };

@@ -12,7 +12,7 @@ function formatCDMX(iso: string): string {
   const day = d.toISOString().slice(8, 10);
   const month = d.toLocaleString('es-MX', { month: 'short', timeZone: 'UTC' });
   const time = d.toISOString().slice(11, 16);
-  return `${day} ${month} · ${time} CDMX`;
+  return `${day} ${month} · ${time} CR`;
 }
 
 export default async function Home() {

@@ -3,8 +3,9 @@
 import { useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { MatchPickCard } from '@/components/MatchPickCard';
+import { AwardsCard } from '@/components/AwardsCard';
 import { scorePick, isGroupLocked, isKnockoutStageLocked } from '@/lib/scoring';
-import type { Match, Pick, PoolConfig } from '@/lib/types';
+import type { Match, Pick, PoolConfig, SpecialPick } from '@/lib/types';
 
 type LocalPick = {
   home_score: number | '';
@@ -12,24 +13,29 @@ type LocalPick = {
   advances_team: string | null;
 };
 
-const STAGE_LABELS: Record<Match['stage'], string> = {
+type ActiveTab = Match['stage'] | 'awards';
+
+const STAGE_LABELS: Record<Match['stage'] | 'awards', string> = {
   group: 'Fase de grupos',
   r32: 'Dieciseisavos',
   r16: 'Octavos',
   qf: 'Cuartos',
   sf: 'Semis',
   tp: '3er lugar',
-  final: 'Final'
+  final: 'Final',
+  awards: '🏆 Premios'
 };
 
 export function PicksClient({
   matches,
   initialPicks,
-  config
+  config,
+  initialSpecialPicks
 }: {
   matches: Match[];
   initialPicks: Pick[];
   config: PoolConfig;
+  initialSpecialPicks: SpecialPick[];
 }) {
   const initialMap: Record<number, LocalPick> = {};
   for (const p of initialPicks) {
@@ -70,7 +76,17 @@ export function PicksClient({
     return order.filter((s) => map.has(s)).map((s) => ({ stage: s, matches: map.get(s)! }));
   }, [matches]);
 
-  const [activeStage, setActiveStage] = useState<Match['stage']>(stages[0]?.stage ?? 'group');
+  const [activeStage, setActiveStage] = useState<ActiveTab>(stages[0]?.stage ?? 'group');
+
+  // Lista de tabs disponibles: stages + premios
+  const tabs: { key: ActiveTab; label: string }[] = useMemo(() => {
+    const arr: { key: ActiveTab; label: string }[] = stages.map((s) => ({
+      key: s.stage,
+      label: STAGE_LABELS[s.stage]
+    }));
+    arr.push({ key: 'awards', label: STAGE_LABELS.awards });
+    return arr;
+  }, [stages]);
 
   function onMatchChange(matchId: number, newPick: LocalPick | null) {
     setPicks((prev) => {
@@ -142,8 +158,11 @@ export function PicksClient({
     return total;
   }, [matches, picks, config]);
 
-  const activeMatches = stages.find((s) => s.stage === activeStage)?.matches ?? [];
-  const stageIsLocked = lockedForStage(activeStage);
+  const isAwardsTab = activeStage === 'awards';
+  const activeMatches = isAwardsTab
+    ? []
+    : stages.find((s) => s.stage === activeStage)?.matches ?? [];
+  const stageIsLocked = isAwardsTab ? false : lockedForStage(activeStage as Match['stage']);
   const lockMessage =
     activeStage === 'group'
       ? `Picks bloqueados (cierre ${new Date(config.group_lock_utc).toLocaleString('es-MX', { timeZone: 'America/Mexico_City' })})`
@@ -173,15 +192,15 @@ export function PicksClient({
 
       {/* Tabs de etapas */}
       <div className="flex gap-1 overflow-x-auto pb-1">
-        {stages.map((s) => (
+        {tabs.map((t) => (
           <button
-            key={s.stage}
-            onClick={() => setActiveStage(s.stage)}
+            key={t.key}
+            onClick={() => setActiveStage(t.key)}
             className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap ${
-              activeStage === s.stage ? 'bg-accent text-ink font-medium' : 'bg-line text-gray-300'
+              activeStage === t.key ? 'bg-accent text-ink font-medium' : 'bg-line text-gray-300'
             }`}
           >
-            {STAGE_LABELS[s.stage]}
+            {t.label}
           </button>
         ))}
       </div>
@@ -190,8 +209,10 @@ export function PicksClient({
         <div className="card p-3 border-lose/40 text-center text-sm text-lose">🔒 {lockMessage}</div>
       )}
 
-      {/* Lista de partidos */}
-      {activeStage === 'group' ? (
+      {/* Contenido por tab */}
+      {isAwardsTab ? (
+        <AwardsCard initialPicks={initialSpecialPicks} config={config} />
+      ) : activeStage === 'group' ? (
         <GroupedView
           matches={activeMatches}
           picks={picks}

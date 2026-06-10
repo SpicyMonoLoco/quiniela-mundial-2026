@@ -31,7 +31,7 @@ const STAGE_LABELS: Record<Match['stage'], string> = {
   final: 'Final'
 };
 
-function formatCDMX(iso: string): string {
+function formatCR(iso: string): string {
   const ms = new Date(iso).getTime() - 6 * 3600 * 1000;
   const d = new Date(ms);
   const day = d.toISOString().slice(8, 10);
@@ -133,7 +133,7 @@ export function PlayerPicksClient({
                   {m.group_letter && <span className="badge bg-line mr-2">G{m.group_letter}</span>}
                   {m.venue}
                 </span>
-                <span>{formatCDMX(m.kickoff_utc)}</span>
+                <span>{formatCR(m.kickoff_utc)}</span>
               </div>
               <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
                 <div className="text-right font-medium flex items-center justify-end gap-1.5">

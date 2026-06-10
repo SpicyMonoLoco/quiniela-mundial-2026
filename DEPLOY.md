@@ -41,6 +41,7 @@ Si todavía no tienes cuenta:
 2. Abre el archivo `supabase/schema.sql` de este repo, copia **TODO**, pégalo en el editor.
 3. Click en **Run** (esquina inferior derecha). Verás "Success. No rows returned".
 4. **New query** otra vez → pega `supabase/migration-01-player-picks.sql` → Run. (Esta migración habilita la vista del jugador y la gráfica de histórico).
+5. **New query** una vez más → pega `supabase/migration-02-special-picks.sql` → Run. (Esta migración habilita los premios individuales: goleador, asistidor, portero, jugador del torneo).
 
 ### 2.2 Configura el login con Google (opcional pero recomendado)
 
