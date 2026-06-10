@@ -96,6 +96,10 @@ $$;
 -- =============================================================
 --  Leaderboard recalculado: incluye puntos de premios
 -- =============================================================
+-- Las funciones cambian de tipo de retorno (agregamos columnas), hay que dropearlas primero
+drop function if exists public.get_leaderboard();
+drop function if exists public.get_player_summary(uuid);
+
 create or replace view public.leaderboard as
 with match_pts as (
   select

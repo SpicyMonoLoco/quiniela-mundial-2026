@@ -3,7 +3,7 @@
 App web para hacer una quiniela del Mundial 2026 con tus amigos.
 
 - **5 pts** marcador exacto · **3 pts** resultado correcto · **0 pts** fallaste
-- Picks de fase de grupos cierran **12 h antes del primer kickoff** (Jun 11, 2026)
+- Picks de fase de grupos cierran **1 h antes del primer kickoff** (Jun 11, 2026 · 12:00 PM CR)
 - Picks de eliminatorias cierran **2 h antes del primer match de la ronda**
 - En empates de eliminatoria predices **quién avanza por penales**
 - Desempate del ranking: número de marcadores exactos, luego nombre
