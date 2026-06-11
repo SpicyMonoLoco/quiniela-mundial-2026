@@ -144,7 +144,7 @@ export default async function ReglasPage() {
         <ol className="space-y-1 text-sm list-decimal list-inside text-gray-300">
           <li>El que tenga más <strong className="text-accent">puntos totales</strong>.</li>
           <li>Si empatan, gana el que tenga más <strong className="text-gold">marcadores exactos</strong>.</li>
-          <li>Si siguen empatados, orden alfabético del nombre.</li>
+          <li>Si siguen empatados, se resuelve con <strong className="text-win">un partido de FIFA</strong> entre los empatados. 🎮</li>
         </ol>
       </section>
 
