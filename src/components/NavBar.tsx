@@ -39,6 +39,7 @@ export function NavBar() {
     { href: '/picks', label: 'Mis picks' },
     { href: '/grupos', label: 'Grupos' },
     { href: '/historico', label: 'Histórico' },
+    { href: '/reglas', label: 'Reglas' },
     { href: '/admin', label: 'Admin' }
   ];
 

@@ -86,9 +86,9 @@ create table if not exists public.pool_config (
 );
 
 insert into public.pool_config (id, group_lock_utc, pool_name)
-values (1, '2026-06-11T18:00:00Z', 'Quiniela PDP — Mundial 2026')
+values (1, '2026-06-11T18:30:00Z', 'Quiniela PDP — Mundial 2026')
 on conflict (id) do nothing;
--- Opener: 2026-06-11 13:00 CR/CDMX (UTC-6) = 19:00 UTC. 1h antes = 18:00 UTC = 12:00 CR.
+-- Opener: 2026-06-11 13:00 CR/CDMX (UTC-6) = 19:00 UTC. 30 min antes = 18:30 UTC = 12:30 CR.
 
 -- =============================================================
 --  ROW LEVEL SECURITY

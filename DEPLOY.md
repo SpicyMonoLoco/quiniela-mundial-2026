@@ -136,7 +136,7 @@ Si todavía no tienes cuenta:
 3. **Importante**: comparten su nombre real (lo ven todos en el ranking).
 4. Tienen hasta las **12 h antes del primer kickoff del 11 de junio** para llenar todos los marcadores de la fase de grupos.
 
-> **Cierre real:** 11 de junio 2026, 18:00 UTC = **11 de junio 12:00 PM hora Costa Rica**. (1 h antes del Méx vs Sudáfrica a las 13:00 CR / 13:00 CDMX en el Azteca).
+> **Cierre real:** 11 de junio 2026, 18:30 UTC = **11 de junio 12:30 PM hora Costa Rica**. (30 min antes del Méx vs Sudáfrica a las 13:00 CR / 13:00 CDMX en el Azteca).
 
 ---
 

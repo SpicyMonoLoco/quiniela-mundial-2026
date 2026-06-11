@@ -11,6 +11,16 @@ import {
 } from '@/lib/standings';
 import { flagFor } from '@/lib/flags';
 
+function formatKickoff(iso: string): string {
+  const ms = new Date(iso).getTime() - 6 * 3600 * 1000;
+  const d = new Date(ms);
+  const dayName = d.toLocaleString('es-MX', { weekday: 'short', timeZone: 'UTC' });
+  const day = d.toISOString().slice(8, 10);
+  const month = d.toLocaleString('es-MX', { month: 'short', timeZone: 'UTC' });
+  const time = d.toISOString().slice(11, 16);
+  return `${dayName} ${day} ${month} · ${time}`;
+}
+
 const GROUPS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as const;
 type GroupLetter = (typeof GROUPS)[number];
 
@@ -46,8 +56,14 @@ export function GruposClient({ matches, picks }: { matches: Match[]; picks: User
   );
 
   // Cuántos partidos del grupo se han jugado y cuántos picks puso el usuario
-  const finishedCount = groupMatches.filter((m) => m.status === 'FINISHED').length;
+  const finishedCount = groupMatches.filter((m) => m.home_score !== null && m.away_score !== null).length;
   const pickedCount = groupMatches.filter((m) => picksByMatch.has(m.id)).length;
+
+  // Orden cronológico para mostrar resultados
+  const orderedMatches = useMemo(
+    () => [...groupMatches].sort((a, b) => a.kickoff_utc.localeCompare(b.kickoff_utc)),
+    [groupMatches]
+  );
 
   // Mapa de posición real por equipo, para marcar coincidencias en la tabla predicha
   const realPosByTeam = new Map<string, number>();
@@ -103,6 +119,46 @@ export function GruposClient({ matches, picks }: { matches: Match[]; picks: User
       <p className="text-xs text-gray-500 text-center py-2">
         Orden: Puntos → Diferencia de goles → Goles a favor
       </p>
+
+      {/* Resultados de los 6 partidos del grupo */}
+      <section className="card p-4">
+        <h3 className="font-semibold mb-3 text-sm">⚽ Resultados del Grupo {group}</h3>
+        <div className="space-y-2">
+          {orderedMatches.map((m) => {
+            const hasResult = m.home_score !== null && m.away_score !== null;
+            const userPick = picksByMatch.get(m.id);
+            return (
+              <div key={m.id} className="flex items-center gap-2 py-1.5 border-t border-line first:border-t-0 first:pt-0">
+                <div className="text-[10px] text-gray-500 w-20 shrink-0">
+                  J{m.matchday} · {formatKickoff(m.kickoff_utc)}
+                </div>
+                <div className="flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 min-w-0 text-sm">
+                  <div className="text-right truncate flex items-center justify-end gap-1.5">
+                    <span className="truncate">{m.home_team}</span>
+                    <span className="text-base leading-none shrink-0">{flagFor(m.home_team)}</span>
+                  </div>
+                  <div className="font-bold tabular-nums shrink-0 px-2">
+                    {hasResult ? (
+                      <span className="text-accent">{m.home_score} - {m.away_score}</span>
+                    ) : (
+                      <span className="text-gray-600 text-xs">vs</span>
+                    )}
+                  </div>
+                  <div className="text-left truncate flex items-center gap-1.5">
+                    <span className="text-base leading-none shrink-0">{flagFor(m.away_team)}</span>
+                    <span className="truncate">{m.away_team}</span>
+                  </div>
+                </div>
+                {userPick && (
+                  <div className="text-[10px] text-gray-500 w-12 text-right shrink-0">
+                    tú: {userPick.home_score}-{userPick.away_score}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

@@ -105,10 +105,12 @@ export function computeGroupStandings(
 }
 
 /**
- * Resolver para el marcador real: devuelve null si el partido no ha terminado.
+ * Resolver para el marcador real: devuelve el score si ya hay resultado.
+ * Acepta cualquier match con scores no-NULL (independiente del status), para
+ * que LIVE/FINISHED actualicen las tablas en tiempo real.
  */
 export function realScoreResolver(m: Match): ScorePair | null {
-  if (m.status === 'FINISHED' && m.home_score !== null && m.away_score !== null) {
+  if (m.home_score !== null && m.away_score !== null) {
     return { home_score: m.home_score, away_score: m.away_score };
   }
   return null;
