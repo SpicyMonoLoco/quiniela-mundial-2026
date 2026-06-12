@@ -37,6 +37,7 @@ export function NavBar() {
   const links = [
     { href: '/', label: 'Ranking' },
     { href: '/picks', label: 'Mis picks' },
+    { href: '/resultados', label: 'Picks de todos' },
     { href: '/grupos', label: 'Grupos' },
     { href: '/historico', label: 'Histórico' },
     { href: '/reglas', label: 'Reglas' },
