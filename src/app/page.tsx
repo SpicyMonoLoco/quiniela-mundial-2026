@@ -3,10 +3,11 @@ import { createClient } from '@/lib/supabase/server';
 import type { LeaderRow, PoolConfig, Match } from '@/lib/types';
 import { flagFor } from '@/lib/flags';
 import { FunFact } from '@/components/FunFact';
+import { TodayMatches, type SimplePick } from '@/components/TodayMatches';
 
 export const dynamic = 'force-dynamic';
 
-function formatCDMX(iso: string): string {
+function formatCR(iso: string): string {
   const ms = new Date(iso).getTime() - 6 * 3600 * 1000;
   const d = new Date(ms);
   const day = d.toISOString().slice(8, 10);
@@ -15,24 +16,51 @@ function formatCDMX(iso: string): string {
   return `${day} ${month} · ${time} CR`;
 }
 
+/** Día CR (UTC-6) representado como ms desde epoch al inicio del día */
+function crDayKey(iso: string): number {
+  const crOffsetMs = 6 * 3600 * 1000;
+  const dayMs = 24 * 3600 * 1000;
+  return Math.floor((new Date(iso).getTime() - crOffsetMs) / dayMs);
+}
+
 export default async function Home() {
   const supabase = createClient();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
 
-  const [{ data: leaders }, { data: config }, { data: nextMatches }] = await Promise.all([
+  const [
+    { data: leaders },
+    { data: config },
+    { data: allMatches },
+    { data: allPicks }
+  ] = await Promise.all([
     supabase.rpc('get_leaderboard'),
     supabase.from('pool_config').select('*').eq('id', 1).single(),
-    supabase
-      .from('matches')
-      .select('*')
-      .eq('status', 'SCHEDULED')
-      .order('kickoff_utc', { ascending: true })
-      .limit(5)
+    supabase.from('matches').select('*').order('kickoff_utc', { ascending: true }),
+    user ? supabase.rpc('get_all_match_picks') : Promise.resolve({ data: [] as SimplePick[] })
   ]);
 
   const cfg = config as PoolConfig | null;
   const lockTime = cfg ? new Date(cfg.group_lock_utc) : null;
   const now = new Date();
   const groupLocked = lockTime ? now >= lockTime : false;
+
+  // Partir matches en: hoy CR, próximos (sin hoy)
+  const todayKey = crDayKey(now.toISOString());
+  const matches = (allMatches as Match[] | null) ?? [];
+  const todayMatches = matches.filter((m) => crDayKey(m.kickoff_utc) === todayKey);
+  const nextMatches = matches
+    .filter(
+      (m) =>
+        crDayKey(m.kickoff_utc) > todayKey &&
+        m.status !== 'FINISHED'
+    )
+    .slice(0, 5);
+
+  const picksTodayList = ((allPicks as SimplePick[] | null) ?? []).filter((p) =>
+    todayMatches.some((m) => m.id === p.match_id)
+  );
 
   return (
     <div className="space-y-8">
@@ -56,7 +84,7 @@ export default async function Home() {
             ) : (
               <>
                 ⏰ <span className="text-gray-300">Cierre fase de grupos:</span>{' '}
-                <span className="text-accent font-medium">{formatCDMX(cfg!.group_lock_utc)}</span>
+                <span className="text-accent font-medium">{formatCR(cfg!.group_lock_utc)}</span>
               </>
             )}
           </p>
@@ -104,29 +132,43 @@ export default async function Home() {
         )}
       </section>
 
+      {/* Partidos de hoy (solo si hay) */}
+      {user && cfg && todayMatches.length > 0 && (
+        <TodayMatches
+          matches={todayMatches}
+          picks={picksTodayList}
+          config={cfg}
+          selfId={user.id}
+        />
+      )}
+
       {/* Próximos partidos */}
-      <section className="card p-5">
-        <h2 className="font-semibold mb-3">⚽ Próximos partidos</h2>
-        <div className="space-y-2">
-          {(nextMatches as Match[] | null)?.map((m) => (
-            <div key={m.id} className="flex items-center justify-between border-t border-line first:border-t-0 pt-2 first:pt-0">
-              <div className="text-sm">
-                <span className="badge bg-line text-gray-300 mr-2">Grupo {m.group_letter}</span>
-                <span className="font-medium">
-                  <span className="mr-1">{flagFor(m.home_team)}</span>
-                  {m.home_team}
-                </span>
-                <span className="text-gray-500 mx-1.5">vs</span>
-                <span className="font-medium">
-                  <span className="mr-1">{flagFor(m.away_team)}</span>
-                  {m.away_team}
-                </span>
+      {nextMatches.length > 0 && (
+        <section className="card p-5">
+          <h2 className="font-semibold mb-3">⚽ Próximos partidos</h2>
+          <div className="space-y-2">
+            {nextMatches.map((m) => (
+              <div key={m.id} className="flex items-center justify-between border-t border-line first:border-t-0 pt-2 first:pt-0">
+                <div className="text-sm">
+                  <span className="badge bg-line text-gray-300 mr-2">
+                    {m.group_letter ? `Grupo ${m.group_letter}` : (m.stage ?? '').toUpperCase()}
+                  </span>
+                  <span className="font-medium">
+                    <span className="mr-1">{flagFor(m.home_team)}</span>
+                    {m.home_team}
+                  </span>
+                  <span className="text-gray-500 mx-1.5">vs</span>
+                  <span className="font-medium">
+                    <span className="mr-1">{flagFor(m.away_team)}</span>
+                    {m.away_team}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-400">{formatCR(m.kickoff_utc)}</div>
               </div>
-              <div className="text-xs text-gray-400">{formatCDMX(m.kickoff_utc)}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       <footer className="text-xs text-gray-500 text-center py-4 space-y-1">
         <p>Empates en knockout: predices quién avanza por penales · Desempate: # de marcadores exactos</p>
