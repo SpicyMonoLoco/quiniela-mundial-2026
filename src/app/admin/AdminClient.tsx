@@ -222,19 +222,24 @@ function AdminMatchRow({
   const isKnockout = match.stage !== 'group';
 
   return (
-    <div className="border-t border-line first:border-t-0 pt-2 first:pt-0 space-y-2">
-      <div className="flex items-center gap-2 flex-wrap text-sm">
-        <span className="text-gray-400 w-8">#{match.id}</span>
-        <span className="flex-1 truncate">
-          {match.home_team} vs {match.away_team}
+    <div className="border-t border-line first:border-t-0 pt-3 first:pt-0 pb-1 space-y-2">
+      {/* Fila 1: nombres de equipos (full width siempre) */}
+      <div className="flex items-center gap-2 text-sm">
+        <span className="text-gray-500 text-xs w-8 shrink-0">#{match.id}</span>
+        <span className="flex-1 font-medium leading-tight">
+          {match.home_team} <span className="text-gray-500">vs</span> {match.away_team}
         </span>
+      </div>
+
+      {/* Fila 2: controles (envuelven si no caben) */}
+      <div className="flex items-center gap-2 flex-wrap pl-10 text-sm">
         <input value={home} onChange={(e) => setHome(e.target.value)} className="input-score" />
         <span className="text-gray-500">–</span>
         <input value={away} onChange={(e) => setAway(e.target.value)} className="input-score" />
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="bg-ink border border-line rounded px-2 py-1"
+          className="bg-ink border border-line rounded px-2 py-1 text-xs"
         >
           <option value="SCHEDULED">SCHEDULED</option>
           <option value="LIVE">LIVE</option>
@@ -244,7 +249,7 @@ function AdminMatchRow({
           <select
             value={adv}
             onChange={(e) => setAdv(e.target.value)}
-            className="bg-ink border border-line rounded px-2 py-1"
+            className="bg-ink border border-line rounded px-2 py-1 text-xs"
           >
             <option value="">¿avanza?</option>
             <option value={match.home_team}>{match.home_team}</option>
@@ -267,7 +272,7 @@ function AdminMatchRow({
         </button>
         <button
           onClick={() => setEditOpen((v) => !v)}
-          className="text-gray-400 hover:text-accent text-sm"
+          className="text-gray-400 hover:text-accent text-base ml-auto"
           title="Editar equipos / hora"
           aria-label="Editar metadatos del partido"
         >
