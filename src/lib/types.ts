@@ -53,6 +53,7 @@ export type PoolConfig = {
   knockout_lock_hours: number;
   pts_award: number;
   semi_lock_utc: string;
+  awards_top_lock_utc: string;
 };
 
 export type Award = 'top_scorer' | 'top_assists' | 'best_keeper' | 'best_player';

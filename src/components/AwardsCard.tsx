@@ -62,11 +62,12 @@ export function AwardsCard({ initialPicks, config }: Props) {
 
   const locks = useMemo(() => {
     const now = Date.now();
-    const groupLocked = now >= new Date(config.group_lock_utc).getTime();
+    const topLock = config.awards_top_lock_utc ?? config.group_lock_utc;
+    const topLocked = now >= new Date(topLock).getTime();
     const semiLocked = config.semi_lock_utc ? now >= new Date(config.semi_lock_utc).getTime() : false;
     return {
-      top_scorer: groupLocked,
-      top_assists: groupLocked,
+      top_scorer: topLocked,
+      top_assists: topLocked,
       best_keeper: semiLocked,
       best_player: semiLocked
     } as Record<Award, boolean>;
@@ -74,7 +75,10 @@ export function AwardsCard({ initialPicks, config }: Props) {
 
   function getLockInfo(award: Award): { locked: boolean; lockTime: string } {
     if (award === 'top_scorer' || award === 'top_assists') {
-      return { locked: locks[award], lockTime: config.group_lock_utc };
+      return {
+        locked: locks[award],
+        lockTime: config.awards_top_lock_utc ?? config.group_lock_utc
+      };
     }
     return { locked: locks[award], lockTime: config.semi_lock_utc };
   }
@@ -126,7 +130,7 @@ export function AwardsCard({ initialPicks, config }: Props) {
             <h2 className="font-bold text-lg">🏆 Premios individuales</h2>
             <p className="text-xs text-gray-400 mt-1">
               Acertar cada uno te da <span className="text-gold font-semibold">{config.pts_award} pts</span>.
-              Bota y Asistidor se cierran con la fase de grupos. Guante y Balón cierran 2 h antes de semis.
+              Cada premio tiene su propio cierre — mira la fecha abajo de cada card.
             </p>
           </div>
           <button

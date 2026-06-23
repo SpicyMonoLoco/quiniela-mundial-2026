@@ -22,11 +22,12 @@ export async function POST(request: Request) {
   if (!cfg) return NextResponse.json({ ok: false, error: 'no config' }, { status: 500 });
 
   const now = Date.now();
-  const groupLocked = now >= new Date(cfg.group_lock_utc).getTime();
+  const topLockUtc = cfg.awards_top_lock_utc ?? cfg.group_lock_utc;
+  const topLocked = now >= new Date(topLockUtc).getTime();
   const semiLocked = cfg.semi_lock_utc && now >= new Date(cfg.semi_lock_utc).getTime();
 
   function isLocked(award: string): boolean {
-    if (award === 'top_scorer' || award === 'top_assists') return groupLocked;
+    if (award === 'top_scorer' || award === 'top_assists') return topLocked;
     if (award === 'best_keeper' || award === 'best_player') return Boolean(semiLocked);
     return true;
   }

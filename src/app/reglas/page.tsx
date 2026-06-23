@@ -126,10 +126,10 @@ export default async function ReglasPage() {
             <strong>🎯 Máximo asistidor</strong> — el que más asistencias dé. Cierra con la fase de grupos.
           </li>
           <li>
-            <strong>🧤 Guante de Oro</strong> — mejor portero del torneo. Cierra 2h antes de la primera semi.
+            <strong>🧤 Guante de Oro</strong> — mejor portero del torneo. Cierra cuando todos los equipos hayan jugado al menos una vez.
           </li>
           <li>
-            <strong>🏆 Balón de Oro</strong> — mejor jugador del torneo (MVP). Cierra 2h antes de la primera semi.
+            <strong>🏆 Balón de Oro</strong> — mejor jugador del torneo (MVP). Cierra cuando todos los equipos hayan jugado al menos una vez.
           </li>
         </ul>
         <p className="text-xs text-gray-400">
