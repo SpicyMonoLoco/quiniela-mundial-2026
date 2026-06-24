@@ -9,7 +9,6 @@ export const dynamic = 'force-dynamic';
 type Summary = {
   total_picks: number;
   exact_picks: number;
-  result_picks: number;
   graded_matches: number;
   points: number;
   display_name: string;

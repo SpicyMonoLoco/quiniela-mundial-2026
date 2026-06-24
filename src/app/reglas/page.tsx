@@ -111,34 +111,6 @@ export default async function ReglasPage() {
 
       <section className="card p-5 space-y-3">
         <h2 className="font-bold text-lg flex items-center gap-2">
-          <span>🏆</span> Premios individuales
-        </h2>
-        <p className="text-sm text-gray-300">
-          Además de los partidos, hay 4 premios individuales que valen{' '}
-          <strong className="text-gold">{cfg?.pts_award ?? 10} pts cada uno</strong> si aciertas. Total: hasta{' '}
-          <strong className="text-gold">{(cfg?.pts_award ?? 10) * 4} pts extra</strong>.
-        </p>
-        <ul className="space-y-2 text-sm">
-          <li>
-            <strong>👟 Bota de Oro</strong> — máximo goleador del torneo. Cierra con la fase de grupos.
-          </li>
-          <li>
-            <strong>🎯 Máximo asistidor</strong> — el que más asistencias dé. Cierra con la fase de grupos.
-          </li>
-          <li>
-            <strong>🧤 Guante de Oro</strong> — mejor portero del torneo. Cierra cuando todos los equipos hayan jugado al menos una vez.
-          </li>
-          <li>
-            <strong>🏆 Balón de Oro</strong> — mejor jugador del torneo (MVP). Cierra cuando todos los equipos hayan jugado al menos una vez.
-          </li>
-        </ul>
-        <p className="text-xs text-gray-400">
-          Los llenas en la pestaña <strong>Mis picks → 🏆 Premios</strong>. Escribe el nombre exacto del jugador. La comparación ignora mayúsculas y espacios extra al final del torneo.
-        </p>
-      </section>
-
-      <section className="card p-5 space-y-3">
-        <h2 className="font-bold text-lg flex items-center gap-2">
           <span>🏅</span> Cómo se desempata el ranking
         </h2>
         <ol className="space-y-1 text-sm list-decimal list-inside text-gray-300">
@@ -162,15 +134,9 @@ export default async function ReglasPage() {
               <td className="py-2 text-gray-300">32 partidos de eliminatoria × 5 pts</td>
               <td className="py-2 text-right font-bold">160 pts</td>
             </tr>
-            <tr>
-              <td className="py-2 text-gray-300">4 premios individuales × {cfg?.pts_award ?? 10} pts</td>
-              <td className="py-2 text-right font-bold">{(cfg?.pts_award ?? 10) * 4} pts</td>
-            </tr>
             <tr className="border-t-2 border-accent">
               <td className="py-2 font-bold">Máximo teórico</td>
-              <td className="py-2 text-right font-bold text-accent">
-                {360 + 160 + (cfg?.pts_award ?? 10) * 4} pts
-              </td>
+              <td className="py-2 text-right font-bold text-accent">520 pts</td>
             </tr>
           </tbody>
         </table>

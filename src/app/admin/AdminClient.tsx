@@ -1,54 +1,12 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { Award, Match, TournamentAward } from '@/lib/types';
+import type { Match } from '@/lib/types';
 
-const AWARD_LABELS: Record<Award, string> = {
-  top_scorer: '👟 Bota de Oro (máximo goleador)',
-  top_assists: '🎯 Máximo asistidor',
-  best_keeper: '🧤 Guante de Oro (mejor portero)',
-  best_player: '🏆 Balón de Oro (mejor jugador)'
-};
-
-export function AdminClient({
-  matches: initial,
-  initialAwards
-}: {
-  matches: Match[];
-  initialAwards: TournamentAward[];
-}) {
+export function AdminClient({ matches: initial }: { matches: Match[] }) {
   const [matches, setMatches] = useState(initial);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
-
-  const awardMap: Record<Award, string> = {
-    top_scorer: '',
-    top_assists: '',
-    best_keeper: '',
-    best_player: ''
-  };
-  for (const a of initialAwards) {
-    if (a.player_name) awardMap[a.award] = a.player_name;
-  }
-  const [awards, setAwards] = useState(awardMap);
-  const [savingAwards, setSavingAwards] = useState(false);
-
-  async function saveAwards() {
-    setSavingAwards(true);
-    setMsg(null);
-    const payload = (Object.keys(awards) as Award[]).map((k) => ({
-      award: k,
-      player_name: awards[k]
-    }));
-    const res = await fetch('/api/admin/awards', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ awards: payload })
-    });
-    const j = await res.json();
-    setMsg(j.ok ? `✓ Premios guardados (recalcula puntos solo)` : `Error: ${j.error}`);
-    setSavingAwards(false);
-  }
 
   async function seedMatches() {
     setBusy('seed');
@@ -130,36 +88,6 @@ export function AdminClient({
           </button>
         </div>
         {msg && <p className="text-sm mt-3 text-accent">{msg}</p>}
-      </section>
-
-      {/* Premios individuales */}
-      <section className="card p-5">
-        <h2 className="font-semibold mb-1">🏆 Premios individuales</h2>
-        <p className="text-gray-400 text-sm mb-4">
-          Llena el ganador real al final del torneo. Cada acierto da 2 pts a los jugadores. La comparación
-          ignora mayúsculas, acentos y espacios extra (pero escríbelo claro).
-        </p>
-        <div className="grid sm:grid-cols-2 gap-3">
-          {(Object.keys(AWARD_LABELS) as Award[]).map((k) => (
-            <label key={k} className="block">
-              <span className="text-sm text-gray-300">{AWARD_LABELS[k]}</span>
-              <input
-                type="text"
-                placeholder="Nombre del ganador"
-                value={awards[k]}
-                onChange={(e) => setAwards((prev) => ({ ...prev, [k]: e.target.value }))}
-                className="w-full mt-1 px-3 py-2 bg-ink border border-line rounded-lg text-sm focus:outline-none focus:border-accent"
-              />
-            </label>
-          ))}
-        </div>
-        <button
-          onClick={saveAwards}
-          disabled={savingAwards}
-          className="btn-primary text-sm mt-4"
-        >
-          {savingAwards ? 'Guardando…' : 'Guardar ganadores de premios'}
-        </button>
       </section>
 
       {Array.from(byStage.entries()).map(([stage, list]) => (
