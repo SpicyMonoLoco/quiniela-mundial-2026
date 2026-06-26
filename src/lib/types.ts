@@ -48,4 +48,5 @@ export type PoolConfig = {
   pts_exact: number;
   pts_result: number;
   knockout_lock_hours: number;
+  match_lock_hours: number;
 };

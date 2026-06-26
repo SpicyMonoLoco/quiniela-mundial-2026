@@ -50,14 +50,14 @@ export function isGroupLocked(config: { group_lock_utc: string }, now: Date = ne
 }
 
 /**
- * ¿Están bloqueados los picks de una etapa knockout?
- * Lock = 2h antes del primer kickoff de esa etapa.
+ * ¿Está bloqueado el pick de un partido knockout individual?
+ * Lock = 1h antes del kickoff del partido.
  */
-export function isKnockoutStageLocked(
-  stageMinKickoffUtc: string,
+export function isKnockoutMatchLocked(
+  matchKickoffUtc: string,
   lockHours: number,
   now: Date = new Date()
 ): boolean {
-  const lockTime = new Date(stageMinKickoffUtc).getTime() - lockHours * 3600 * 1000;
+  const lockTime = new Date(matchKickoffUtc).getTime() - lockHours * 3600 * 1000;
   return now.getTime() >= lockTime;
 }

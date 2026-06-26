@@ -4,6 +4,7 @@ import type { LeaderRow, PoolConfig, Match } from '@/lib/types';
 import { flagFor } from '@/lib/flags';
 import { FunFact } from '@/components/FunFact';
 import { TodayMatches, type SimplePick } from '@/components/TodayMatches';
+import { projectAllMatches } from '@/lib/projections';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,9 +47,9 @@ export default async function Home() {
   const now = new Date();
   const groupLocked = lockTime ? now >= lockTime : false;
 
-  // Partir matches en: hoy CR, próximos (sin hoy)
+  // Partir matches en: hoy CR, próximos (sin hoy). Aplicamos proyecciones knockout.
   const todayKey = crDayKey(now.toISOString());
-  const matches = (allMatches as Match[] | null) ?? [];
+  const matches = projectAllMatches((allMatches as Match[] | null) ?? []);
   const todayMatches = matches.filter((m) => crDayKey(m.kickoff_utc) === todayKey);
   const nextMatches = matches
     .filter(

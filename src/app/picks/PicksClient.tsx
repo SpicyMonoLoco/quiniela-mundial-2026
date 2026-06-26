@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { MatchPickCard } from '@/components/MatchPickCard';
-import { scorePick, isGroupLocked, isKnockoutStageLocked } from '@/lib/scoring';
+import { scorePick, isGroupLocked, isKnockoutMatchLocked } from '@/lib/scoring';
 import type { Match, Pick, PoolConfig } from '@/lib/types';
 
 type LocalPick = {
@@ -46,20 +46,18 @@ export function PicksClient({
   const [saving, setSaving] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Agrupar por etapa
-  const stageMins = useMemo(() => {
-    const m: Record<string, string> = {};
-    for (const match of matches) {
-      if (!m[match.stage] || match.kickoff_utc < m[match.stage]) m[match.stage] = match.kickoff_utc;
-    }
-    return m;
-  }, [matches]);
+  // Lock por match. Para grupos: lock global. Para knockout: 1h antes de cada partido.
+  const lockHours = config.match_lock_hours ?? 1;
+  const isMatchLocked = (m: Match) => {
+    if (m.stage === 'group') return isGroupLocked(config);
+    return isKnockoutMatchLocked(m.kickoff_utc, lockHours);
+  };
 
+  // Para banner del estado de la pestaña: locked = ALL matches están locked
   const lockedForStage = (stage: Match['stage']) => {
     if (stage === 'group') return isGroupLocked(config);
-    const minKickoff = stageMins[stage];
-    if (!minKickoff) return false;
-    return isKnockoutStageLocked(minKickoff, config.knockout_lock_hours);
+    const stageMatches = matches.filter((m) => m.stage === stage);
+    return stageMatches.length > 0 && stageMatches.every(isMatchLocked);
   };
 
   const stages = useMemo(() => {
@@ -101,13 +99,13 @@ export function PicksClient({
       return;
     }
 
-    // Solo guardar los picks de etapas no bloqueadas
+    // Solo guardar los picks de partidos no bloqueados (individualmente)
     const rows: Pick[] = [];
     for (const m of matches) {
       const p = picks[m.id];
       if (!p) continue;
       if (p.home_score === '' || p.away_score === '') continue;
-      if (lockedForStage(m.stage)) continue;
+      if (isMatchLocked(m)) continue;
       rows.push({
         user_id: userId,
         match_id: m.id,
@@ -155,7 +153,7 @@ export function PicksClient({
   const lockMessage =
     activeStage === 'group'
       ? `Picks bloqueados (cierre ${new Date(config.group_lock_utc).toLocaleString('es-MX', { timeZone: 'America/Mexico_City' })})`
-      : `Picks bloqueados 2h antes del primer match de esta ronda`;
+      : `Picks knockout cierran 1 h antes del kickoff de cada partido`;
 
   return (
     <div className="space-y-5">
@@ -203,7 +201,7 @@ export function PicksClient({
         <GroupedView
           matches={activeMatches}
           picks={picks}
-          locked={stageIsLocked}
+          isLocked={isMatchLocked}
           onChange={onMatchChange}
           config={config}
         />
@@ -211,7 +209,7 @@ export function PicksClient({
         <FlatView
           matches={activeMatches}
           picks={picks}
-          locked={stageIsLocked}
+          isLocked={isMatchLocked}
           onChange={onMatchChange}
           config={config}
         />
@@ -223,7 +221,7 @@ export function PicksClient({
 type ViewProps = {
   matches: Match[];
   picks: Record<number, LocalPick>;
-  locked: boolean;
+  isLocked: (m: Match) => boolean;
   onChange: (matchId: number, pick: LocalPick | null) => void;
   config: PoolConfig;
 };
@@ -246,7 +244,7 @@ function pointsFor(
   );
 }
 
-function FlatView({ matches, picks, locked, onChange, config }: ViewProps) {
+function FlatView({ matches, picks, isLocked, onChange, config }: ViewProps) {
   if (matches.length === 0) {
     return (
       <p className="text-gray-500 text-sm text-center py-8">
@@ -263,7 +261,7 @@ function FlatView({ matches, picks, locked, onChange, config }: ViewProps) {
             key={m.id}
             match={m}
             initialPick={p}
-            locked={locked}
+            locked={isLocked(m)}
             onChange={onChange}
             pointsEarned={pointsFor(m, p, { pts_exact: config.pts_exact, pts_result: config.pts_result })}
           />
@@ -273,7 +271,7 @@ function FlatView({ matches, picks, locked, onChange, config }: ViewProps) {
   );
 }
 
-function GroupedView({ matches, picks, locked, onChange, config }: ViewProps) {
+function GroupedView({ matches, picks, isLocked, onChange, config }: ViewProps) {
   const groups = useMemo(() => {
     const map = new Map<string, Match[]>();
     for (const m of matches) {
@@ -331,7 +329,7 @@ function GroupedView({ matches, picks, locked, onChange, config }: ViewProps) {
                     key={m.id}
                     match={m}
                     initialPick={p}
-                    locked={locked}
+                    locked={isLocked(m)}
                     onChange={onChange}
                     pointsEarned={pointsFor(m, p, { pts_exact: config.pts_exact, pts_result: config.pts_result })}
                   />

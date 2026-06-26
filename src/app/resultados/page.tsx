@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { ResultadosClient } from './ResultadosClient';
+import { projectAllMatches } from '@/lib/projections';
 import type { Match, PoolConfig } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -41,7 +42,7 @@ export default async function ResultadosPage() {
 
   return (
     <ResultadosClient
-      matches={(matches as Match[]) ?? []}
+      matches={projectAllMatches((matches as Match[]) ?? [])}
       allPicks={(picks as MatchPick[]) ?? []}
       config={config as PoolConfig}
       selfId={user.id}
