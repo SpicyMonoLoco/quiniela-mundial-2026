@@ -3,43 +3,57 @@ import type { Match } from './types';
 /**
  * Misma lógica que la función SQL `score_pick`, replicada en el cliente
  * para mostrar previews "lo que llevarías ganado" en tiempo real.
+ *
+ * Reglas (votadas por el grupo):
+ *  - Base: 5 marcador exacto / 3 resultado correcto / 0 falla (en 120 min).
+ *  - Extra +1 si knockout fue a penales Y el usuario predijo correctamente
+ *    quién avanza:
+ *      · Pick empate → pick.advances_team
+ *      · Pick no-empate → el equipo con mayor score predicho (implícito)
  */
 export function scorePick(
   pick: { home_score: number; away_score: number; advances_team: string | null } | null,
-  match: Pick<Match, 'home_score' | 'away_score' | 'advances_team' | 'stage'>,
+  match: Pick<Match, 'home_score' | 'away_score' | 'advances_team' | 'stage' | 'home_team' | 'away_team'>,
   config: { pts_exact: number; pts_result: number }
 ): number {
   if (!pick) return 0;
   if (match.home_score == null || match.away_score == null) return 0;
 
+  // Base score
+  let base = 0;
   const exactScore = pick.home_score === match.home_score && pick.away_score === match.away_score;
-  const isDraw = match.home_score === match.away_score;
-  const knockoutDraw = match.stage !== 'group' && isDraw;
-
-  const pickResult = pick.home_score > pick.away_score ? 'H' : pick.home_score < pick.away_score ? 'A' : 'D';
-  const realResult = match.home_score > match.away_score ? 'H' : match.home_score < match.away_score ? 'A' : 'D';
-
   if (exactScore) {
-    if (knockoutDraw) {
-      if (pick.advances_team && match.advances_team && pick.advances_team === match.advances_team) {
-        return config.pts_exact;
-      }
-      return config.pts_result; // marcador exacto pero falló quién avanza
+    base = config.pts_exact;
+  } else {
+    const pickResult = pick.home_score > pick.away_score ? 'H' : pick.home_score < pick.away_score ? 'A' : 'D';
+    const realResult = match.home_score > match.away_score ? 'H' : match.home_score < match.away_score ? 'A' : 'D';
+    if (pickResult === realResult) {
+      base = config.pts_result;
     }
-    return config.pts_exact;
   }
 
-  if (pickResult === realResult) {
-    if (knockoutDraw) {
-      if (pick.advances_team && match.advances_team && pick.advances_team === match.advances_team) {
-        return config.pts_result;
-      }
-      return 0;
+  // Extra +1 solo en knockout y solo si el match fue a penales (advances_team del match seteado)
+  let extra = 0;
+  if (match.stage !== 'group' && match.advances_team) {
+    let predictedAdvancer: string | null = null;
+    if (pick.home_score === pick.away_score) {
+      predictedAdvancer = pick.advances_team;
+    } else if (pick.home_score > pick.away_score) {
+      predictedAdvancer = match.home_team;
+    } else {
+      predictedAdvancer = match.away_team;
     }
-    return config.pts_result;
+
+    if (predictedAdvancer && norm(predictedAdvancer) === norm(match.advances_team)) {
+      extra = 1;
+    }
   }
 
-  return 0;
+  return base + extra;
+}
+
+function norm(s: string): string {
+  return s.trim().toLowerCase();
 }
 
 /**

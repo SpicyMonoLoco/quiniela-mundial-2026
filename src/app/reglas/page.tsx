@@ -95,17 +95,30 @@ export default async function ReglasPage() {
 
       <section className="card p-5 space-y-3">
         <h2 className="font-bold text-lg flex items-center gap-2">
-          <span>⚽</span> Empates en eliminatorias
+          <span>⚽</span> Eliminatorias: bonus por penales
         </h2>
         <p className="text-sm text-gray-300">
-          En las rondas eliminatorias no hay empate al final del partido — alguien tiene que avanzar.
-          Si tu pick es un empate (ej. 1-1), la app te va a pedir{' '}
-          <strong className="text-accent">elegir qué equipo avanza por penales</strong>.
+          El marcador que pones aplica para <strong className="text-accent">los 120 minutos</strong> (regular +
+          extra time, sin penales).
         </p>
+        <p className="text-sm text-gray-300">
+          Si el partido se va a penales, ganas <strong className="text-gold">+1 punto extra</strong> si
+          acertaste quién avanza:
+        </p>
+        <ul className="space-y-2 text-sm text-gray-300 list-disc list-inside">
+          <li>
+            <strong>Si predijiste empate</strong>: la app te pide elegir quién pasa por penales. Si aciertas,
+            sumas +1.
+          </li>
+          <li>
+            <strong>Si predijiste un ganador en 120 min</strong> (ej. "Brasil 2-1") pero el partido fue 1-1 en
+            120 min y se decidió por penales: sumas +1 si Brasil avanzó por penales (porque dijiste que Brasil
+            ganaba).
+          </li>
+        </ul>
         <p className="text-xs text-gray-400">
-          Si aciertas el marcador exacto y el equipo que avanza → {cfg?.pts_exact ?? 5} pts. Si aciertas el marcador
-          pero te equivocas en quién avanza → solo {cfg?.pts_result ?? 3} pts. Si fallas el marcador y dijiste
-          empate cuando no hubo → 0 pts.
+          Resultado máximo en un partido knockout: <strong className="text-gold">6 pts</strong> (5 marcador
+          exacto + 1 quién avanza).
         </p>
       </section>
 
@@ -131,12 +144,12 @@ export default async function ReglasPage() {
               <td className="py-2 text-right font-bold">360 pts</td>
             </tr>
             <tr>
-              <td className="py-2 text-gray-300">32 partidos de eliminatoria × 5 pts</td>
-              <td className="py-2 text-right font-bold">160 pts</td>
+              <td className="py-2 text-gray-300">32 partidos de eliminatoria × 6 pts (5 + 1)</td>
+              <td className="py-2 text-right font-bold">192 pts</td>
             </tr>
             <tr className="border-t-2 border-accent">
               <td className="py-2 font-bold">Máximo teórico</td>
-              <td className="py-2 text-right font-bold text-accent">520 pts</td>
+              <td className="py-2 text-right font-bold text-accent">552 pts</td>
             </tr>
           </tbody>
         </table>

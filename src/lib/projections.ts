@@ -76,13 +76,79 @@ function compareStandingsDesc(a: StandingRow, b: StandingRow): number {
 }
 
 /**
+ * Asigna los 8 mejores 3ros lugares a los 8 slots "Mejor 3° (...)" del R32,
+ * garantizando que cada equipo aparece en MÁXIMO un slot.
+ *
+ * Algoritmo greedy: ordena los 12 3ros lugares por ranking, toma los top 8,
+ * y los asigna a slots en orden: cada qualifier (mejor primero) va al primer
+ * slot disponible cuya lista de grupos candidatos lo incluye.
+ *
+ * Devuelve Map<placeholderString, teamName>.
+ */
+export function assignThirdPlaceTeams(
+  allMatches: Match[],
+  standings: GroupStandings
+): Map<string, string> {
+  const assignments = new Map<string, string>();
+
+  // 1. Recolectar todos los 3ros lugares con al menos 1 partido jugado
+  const thirds: { group: string; row: StandingRow }[] = [];
+  for (const [g, rows] of standings) {
+    if (rows.length >= 3 && rows[2].played > 0) {
+      thirds.push({ group: g, row: rows[2] });
+    }
+  }
+  if (thirds.length === 0) return assignments;
+
+  // 2. Ordenar por ranking (pts → DG → GF)
+  thirds.sort((a, b) => compareStandingsDesc(a.row, b.row));
+
+  // 3. Los 8 mejores son los clasificados
+  const qualifiers = thirds.slice(0, 8);
+
+  // 4. Encontrar todos los slots "Mejor 3° (...)" únicos
+  type Slot = { placeholder: string; candidates: string[]; matchId: number };
+  const slots: Slot[] = [];
+  const seenPlaceholders = new Set<string>();
+  for (const m of allMatches) {
+    if (m.stage !== 'r32') continue;
+    for (const team of [m.home_team, m.away_team]) {
+      const trimmed = team.trim();
+      if (seenPlaceholders.has(trimmed)) continue;
+      const parsed = /^Mejor 3°\s+\(([A-L/]+)\)$/.exec(trimmed);
+      if (parsed) {
+        seenPlaceholders.add(trimmed);
+        slots.push({ placeholder: trimmed, candidates: parsed[1].split('/'), matchId: m.id });
+      }
+    }
+  }
+  // Orden estable por matchId (importante para que la asignación sea determinística)
+  slots.sort((a, b) => a.matchId - b.matchId);
+
+  // 5. Para cada qualifier (mejor primero), asignar al primer slot disponible
+  const usedSlots = new Set<string>();
+  for (const q of qualifiers) {
+    for (const slot of slots) {
+      if (usedSlots.has(slot.placeholder)) continue;
+      if (!slot.candidates.includes(q.group)) continue;
+      assignments.set(slot.placeholder, q.row.team);
+      usedSlots.add(slot.placeholder);
+      break;
+    }
+  }
+
+  return assignments;
+}
+
+/**
  * Dado un placeholder, intenta resolverlo al nombre del equipo real.
- * Devuelve null si todavía no se puede resolver (ej. el grupo no terminó).
+ * Devuelve null si todavía no se puede resolver.
  */
 export function projectTeam(
   placeholder: string,
   standings: GroupStandings,
-  outcomes: Map<number, { winner: string; loser: string }>
+  outcomes: Map<number, { winner: string; loser: string }>,
+  thirdAssignments: Map<string, string>
 ): string | null {
   if (!placeholder) return null;
 
@@ -94,26 +160,14 @@ export function projectTeam(
     const standings_g = standings.get(group);
     if (!standings_g || standings_g.length < pos) return null;
     const row = standings_g[pos - 1];
-    // Solo proyectamos si ese equipo ha jugado al menos 1 partido
     if (row.played === 0) return null;
     return row.team;
   }
 
-  // "Mejor 3° (A/B/C/D/F)"
+  // "Mejor 3° (A/B/C/D/F)" — usa la asignación global única
   m = /^Mejor 3°\s+\(([A-L/]+)\)$/.exec(placeholder.trim());
   if (m) {
-    const groups = m[1].split('/');
-    const candidates: StandingRow[] = [];
-    for (const g of groups) {
-      const s = standings.get(g);
-      if (!s || s.length < 3) continue;
-      const third = s[2];
-      if (third.played === 0) continue;
-      candidates.push(third);
-    }
-    if (candidates.length === 0) return null;
-    candidates.sort(compareStandingsDesc);
-    return candidates[0].team;
+    return thirdAssignments.get(placeholder.trim()) ?? null;
   }
 
   // "Ganador 73"
@@ -130,7 +184,6 @@ export function projectTeam(
     return outcomes.get(matchId)?.loser ?? null;
   }
 
-  // No es placeholder reconocido → ya es un nombre real
   return null;
 }
 
@@ -154,6 +207,7 @@ export function isPlaceholderTeam(name: string): boolean {
 export function projectAllMatches(allMatches: Match[]): Match[] {
   const standings = buildGroupStandings(allMatches);
   const outcomes = buildKnockoutOutcomes(allMatches);
+  const thirdAssignments = assignThirdPlaceTeams(allMatches, standings);
 
   return allMatches.map((m) => {
     if (m.stage === 'group') return m;
@@ -162,11 +216,11 @@ export function projectAllMatches(allMatches: Match[]): Match[] {
     let awayTeam = m.away_team;
 
     if (isPlaceholderTeam(homeTeam)) {
-      const projected = projectTeam(homeTeam, standings, outcomes);
+      const projected = projectTeam(homeTeam, standings, outcomes, thirdAssignments);
       if (projected) homeTeam = projected;
     }
     if (isPlaceholderTeam(awayTeam)) {
-      const projected = projectTeam(awayTeam, standings, outcomes);
+      const projected = projectTeam(awayTeam, standings, outcomes, thirdAssignments);
       if (projected) awayTeam = projected;
     }
 
