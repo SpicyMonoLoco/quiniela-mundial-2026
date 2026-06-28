@@ -46,9 +46,12 @@ export function PicksClient({
   const [saving, setSaving] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Lock por match. Para grupos: lock global. Para knockout: 1h antes de cada partido.
+  // Lock por match. Override por-match → grupos → knockout default.
   const lockHours = config.match_lock_hours ?? 1;
   const isMatchLocked = (m: Match) => {
+    if (m.pick_lock_utc) {
+      return Date.now() >= new Date(m.pick_lock_utc).getTime();
+    }
     if (m.stage === 'group') return isGroupLocked(config);
     return isKnockoutMatchLocked(m.kickoff_utc, lockHours);
   };

@@ -14,7 +14,13 @@
 --   - leaderboard, get_player_summary, get_all_match_picks pasan los nuevos
 --     params al llamar score_pick
 
--- 1) Drop la versión vieja (cambio de signature)
+-- 1) Drop dependientes primero (la vista y funciones que usan score_pick),
+--    después drop score_pick mismo. Sin este orden Postgres no nos deja
+--    cambiar la signature.
+drop function if exists public.get_leaderboard();
+drop function if exists public.get_all_match_picks();
+drop function if exists public.get_player_summary(uuid);
+drop view if exists public.leaderboard;
 drop function if exists public.score_pick(int, int, text, int, int, text, text, int, int);
 
 create or replace function public.score_pick(

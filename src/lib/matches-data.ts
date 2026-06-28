@@ -133,10 +133,10 @@ export const RAW_MATCHES: RawMatch[] = [
   { id: 90,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-04', time: '12:00', tzOffset: -5, venue: 'NRG Stadium',            city: 'Houston',            country: 'USA', home: 'Ganador 73', away: 'Ganador 75' },
   { id: 91,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-05', time: '16:00', tzOffset: -4, venue: 'MetLife Stadium',        city: 'East Rutherford',    country: 'USA', home: 'Ganador 76', away: 'Ganador 78' },
   { id: 92,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-05', time: '18:00', tzOffset: -6, venue: 'Estadio Azteca',         city: 'Ciudad de México',   country: 'MEX', home: 'Ganador 79', away: 'Ganador 80' },
-  { id: 93,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-06', time: '14:00', tzOffset: -5, venue: 'AT&T Stadium',           city: 'Arlington',          country: 'USA', home: 'Ganador 83', away: 'Ganador 84' },
+  { id: 93,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-06', time: '14:00', tzOffset: -5, venue: 'AT&T Stadium',           city: 'Arlington',          country: 'USA', home: 'Ganador 87', away: 'Ganador 84' },
   { id: 94,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-06', time: '17:00', tzOffset: -7, venue: 'Lumen Field',            city: 'Seattle',            country: 'USA', home: 'Ganador 81', away: 'Ganador 82' },
   { id: 95,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-07', time: '12:00', tzOffset: -4, venue: 'Mercedes-Benz Stad.',    city: 'Atlanta',            country: 'USA', home: 'Ganador 86', away: 'Ganador 88' },
-  { id: 96,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-07', time: '13:00', tzOffset: -7, venue: 'BC Place',               city: 'Vancouver',          country: 'CAN', home: 'Ganador 85', away: 'Ganador 87' },
+  { id: 96,  stage: 'r16', group_letter: null, matchday: null, date: '2026-07-07', time: '13:00', tzOffset: -7, venue: 'BC Place',               city: 'Vancouver',          country: 'CAN', home: 'Ganador 85', away: 'Ganador 83' },
 
   // ===== Cuartos (QF) — 9 a 11 jul =====
   { id: 97,  stage: 'qf',  group_letter: null, matchday: null, date: '2026-07-09', time: '16:00', tzOffset: -4, venue: 'Gillette Stadium',       city: 'Foxborough',         country: 'USA', home: 'Ganador 89', away: 'Ganador 90' },

@@ -14,6 +14,7 @@ export type Match = {
   advances_team: string | null;
   status: 'SCHEDULED' | 'LIVE' | 'FINISHED';
   external_id: string | null;
+  pick_lock_utc: string | null;
 };
 
 export type Pick = {
