@@ -64,14 +64,47 @@ export function AdminClient({ matches: initial }: { matches: Match[] }) {
     }
   }
 
+  // Helper: ¿el partido es hoy en hora CR (UTC-6)?
+  function isTodayCR(iso: string): boolean {
+    const crOffset = 6 * 3600 * 1000;
+    const dayMs = 24 * 3600 * 1000;
+    const today = Math.floor((Date.now() - crOffset) / dayMs);
+    const match = Math.floor((new Date(iso).getTime() - crOffset) / dayMs);
+    return today === match;
+  }
+
+  const todayMatches = useMemo(
+    () => matches.filter((m) => isTodayCR(m.kickoff_utc)),
+    [matches]
+  );
+
+  // Stages: knockout primero (más reciente), group al final
   const byStage = useMemo(() => {
+    const order: Match['stage'][] = ['final', 'tp', 'sf', 'qf', 'r16', 'r32', 'group'];
     const map = new Map<string, Match[]>();
     for (const m of matches) {
+      // Excluir los matches de hoy (ya están en su propia sección)
+      if (isTodayCR(m.kickoff_utc)) continue;
       if (!map.has(m.stage)) map.set(m.stage, []);
       map.get(m.stage)!.push(m);
     }
-    return map;
+    // Devolver en el orden que queremos
+    const ordered = new Map<string, Match[]>();
+    for (const stage of order) {
+      if (map.has(stage)) ordered.set(stage, map.get(stage)!);
+    }
+    return ordered;
   }, [matches]);
+
+  const STAGE_NAMES: Record<string, string> = {
+    group: 'Fase de grupos',
+    r32: 'Dieciseisavos',
+    r16: 'Octavos',
+    qf: 'Cuartos',
+    sf: 'Semis',
+    tp: '3er lugar',
+    final: 'Final'
+  };
 
   return (
     <div className="space-y-5">
@@ -90,9 +123,36 @@ export function AdminClient({ matches: initial }: { matches: Match[] }) {
         {msg && <p className="text-sm mt-3 text-accent">{msg}</p>}
       </section>
 
+      {todayMatches.length > 0 && (
+        <section className="card p-5 border-2 border-lose/30 bg-lose/5">
+          <h2 className="font-semibold mb-3 flex items-center gap-2">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lose opacity-60" />
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-lose" />
+            </span>
+            Partidos de hoy
+            <span className="text-xs text-gray-500 font-normal">
+              ({todayMatches.length} {todayMatches.length === 1 ? 'partido' : 'partidos'})
+            </span>
+          </h2>
+          <div className="space-y-2">
+            {todayMatches.map((m) => (
+              <AdminMatchRow
+                key={m.id}
+                match={m}
+                onSave={(body) => saveResult(m.id, body)}
+                onSaveMeta={(body) => saveMatchMeta(m.id, body)}
+                busy={busy === `m${m.id}`}
+                busyMeta={busy === `e${m.id}`}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       {Array.from(byStage.entries()).map(([stage, list]) => (
         <section key={stage} className="card p-5">
-          <h2 className="font-semibold mb-3 capitalize">{stage}</h2>
+          <h2 className="font-semibold mb-3">{STAGE_NAMES[stage] ?? stage}</h2>
           <div className="space-y-2">
             {list.map((m) => (
               <AdminMatchRow
